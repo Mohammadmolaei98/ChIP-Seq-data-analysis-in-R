@@ -7,24 +7,28 @@ library(ggplot2)
 library(reshape2)
 library(plyr)
 library(gplots)
+library(Biobase)
+library(gplots)
 
-setwd("~/Advanced_Bioinformatics1/")
-res<- read.delim("table.txt")
+setwd("~/Documents/Rproject/pro2//")
+res<- read.delim("GSE9476.top.table.tsv")
 head(res)
 aml.up<- subset(res,logFC > 1 & adj.P.Val < 0.05)
 dim(aml.up)
 aml.up.gene <- unique(aml.up$Gene.symbol)
 length(aml.up.gene)
+aml.up.gene
 head(aml.up.gene)
 ####session11####
-setRepositories()
+#setRepositories()
 #1 2
 #install.packages(c("GEOquery","limma","gplots","pheatmap","Biobase","umap"))
+setwd("~/Documents/Rproject/pro2//")
 
-setwd("C:/Users/m/Documents/Advanced_Bioinformatics1")
 series <- "GSE9476"
 gset <- getGEO(series,GSEMatrix =TRUE, AnnotGPL=TRUE,destdir ="data/")#data is adress#
-
+class(gset)
+names(gset)
 platform <- "GPL96"
 if (length(gset) > 1) idx <- grep(platform , attr(gset, "names")) else idx <- 1
 gset <- gset[[idx]]
@@ -112,6 +116,7 @@ cont.matrix <- makeContrasts(AML-CD34,levels = design)
 fit2 <- contrasts.fit(fit,cont.matrix)
 fit2 <- eBayes(fit2,0.01)
 tT<-topTable(fit2,adjust="fdr",sort.by="B",number=Inf)
+head(topTable)
 tT <- subset(tT,select=c("Gene.symbol","Gene.ID","adj.P.Val","logFC"))
 write.table(tT,"result/AML_CD34.txt",row.names =F,sep ="t",quote = F)
 #####session12####
@@ -120,10 +125,12 @@ aml.up.genes <- unique(aml.up$Gene.symbol)
 #aml.up.genes <- sub("///.*","",aml.up.genes)
 aml.up.genes <- unique(as.character(strsplit2(aml.up.genes,"///")))
 write.table(aml.up.genes,file = "result/AML_CD34_up.txt",quote = F,row.names = F,col.names = F)
+aml.up.genes
 
 
 aml.down <- subset(tT,logFC < -1 & adj.P.Val < 0.05)
 #aml.down.genes <- sub("///.*","",aml.down.genes)
+aml.down.genes <- unique(aml.down$Gene.symbol)
 aml.down.genes <- unique(as.character(strsplit2(aml.down.genes,"///")))
 write.table(aml.down.genes,file = "result/AML_CD34_down.txt",quote = F,row.names = F,col.names = F)
 
